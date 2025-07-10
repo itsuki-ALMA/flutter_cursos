@@ -1,3 +1,3 @@
 # flutter_cursos
 
-A new Flutter project.
+este repositorio e um projeto de aprendizado durante um curso alura/udemy para aprender desenvolvimento mobile
