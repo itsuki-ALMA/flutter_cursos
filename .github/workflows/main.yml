@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: read
+  issues: write # Necessário para criar issue de aprovação manual
+
 jobs:
   flutter-ci:
     name: Flutter CI
@@ -14,7 +18,7 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -22,14 +26,14 @@ jobs:
           channel: stable
           force-install: true
 
-
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.pub-cache
           key: ${{ runner.os }}-pub-cache-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: ${{ runner.os }}-pub-cache-
+          restore-keys: |
+            ${{ runner.os }}-pub-cache-
 
       - name: Install dependencies
         run: flutter pub get
@@ -46,14 +50,24 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Wait for approval
+      - name: Wait for manual approval before deploy
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: LucasGit10,itsuki-ALMA
           minimum-approvals: 2
           issue-title: 'Approval required to proceed with deployment'
-          issue-body: 'The CI workflow passed. Do you approve proceeding to the next stage?'
+          issue-body: |
+            > [!NOTE]
+            > Workflow is pending manual review.
+            > Respond with "approved", "approve", "yes", or "lgtm" to proceed.
+            
+            > [!TIP]
+            > You can also respond with "denied", "deny", or "no" to cancel.
+            
+            > [!INFO]
+            > Workflow: ${{ github.workflow }}
+            > Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   build-web:
     name: Build Web
@@ -67,7 +81,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.13.9'
+          flutter-version: '3.32.8' # Mantido igual ao job de CI
           channel: stable
 
       - name: Install dependencies
