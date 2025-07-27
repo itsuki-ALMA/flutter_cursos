@@ -39,7 +39,7 @@ jobs:
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: LucasGit10,itsuki-ALMA
+          approvers: LucasGit10
           minimum-approvals: 2
           issue-title: 'Approval required to proceed with deployment'
           issue-body: |
