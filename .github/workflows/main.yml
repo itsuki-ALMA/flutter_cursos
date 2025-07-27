@@ -10,26 +10,12 @@ jobs:
   flutter-ci:
     name: Flutter CI
     runs-on: ubuntu-22.04
+    container:
+      image: lmatrangolo/flutter-custom
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.32.8'
-          channel: stable
-          force-install: true
-
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: ${{ runner.os }}-pub-cache-
 
       - name: Install dependencies
         run: flutter pub get
@@ -38,7 +24,12 @@ jobs:
         run: flutter analyze
 
       - name: Run tests
-        run: flutter test
+        run: |
+          if [ -d "test" ]; then
+            flutter test
+          else
+            echo "No test directory found. Skipping tests."
+          fi
 
   manual-approval:
     name: Manual Approval
@@ -59,16 +50,12 @@ jobs:
     name: Build Web
     needs: manual-approval
     runs-on: ubuntu-22.04
+    container:
+      image: lmatrangolo/flutter-custom
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.13.9'
-          channel: stable
 
       - name: Install dependencies
         run: flutter pub get
