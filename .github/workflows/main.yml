@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: read
+  issues: write  # necessário para abrir issue de aprovação manual
+
 jobs:
   flutter-ci:
     name: Flutter CI
@@ -14,49 +18,41 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+
+      - name: Run Flutter analyze and tests in Docker
+        uses: addnab/docker-run-action@v3
         with:
-          flutter-version: '3.32.8'
-          channel: stable
-          force-install: true
-
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-          key: ${{ runner.os }}-pub-cache-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: ${{ runner.os }}-pub-cache-
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Analyze code
-        run: flutter analyze
-
-      - name: Run tests
-        run: flutter test
+          image: lmatrangolo/flutter-custom
+          options: --workdir /app
+          run: |
+            flutter pub get
+            flutter analyze
+            flutter test
 
   manual-approval:
     name: Manual Approval
     needs: flutter-ci
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Wait for approval
+      - name: Wait for manual approval before deployment
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: LucasGit10,itsuki-ALMA
           minimum-approvals: 2
           issue-title: 'Approval required to proceed with deployment'
-          issue-body: 'The CI workflow passed. Do you approve proceeding to the next stage?'
+          issue-body: |
+            The CI workflow has passed. Do you approve proceeding to the next stage?
+
+            ✅ To approve, comment: `approve`, `yes`, `lgtm`
+            ❌ To deny, comment: `deny`, `no`
+
+            Workflow: ${{ github.workflow }}
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   build-web:
-    name: Build Web
+    name: Build Flutter Web
     needs: manual-approval
     runs-on: ubuntu-22.04
 
@@ -64,17 +60,14 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Build Flutter Web in Docker
+        uses: addnab/docker-run-action@v3
         with:
-          flutter-version: '3.13.9'
-          channel: stable
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build Web
-        run: flutter build web
+          image: lmatrangolo/flutter-custom
+          options: --workdir /app
+          run: |
+            flutter pub get
+            flutter build web
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
