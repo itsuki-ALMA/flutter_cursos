@@ -40,7 +40,7 @@ jobs:
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: LucasGit10
-          minimum-approvals: 2
+          minimum-approvals: 1
           issue-title: 'Approval required to proceed with deployment'
           issue-body: |
             The CI workflow has passed. Do you approve proceeding to the next stage?
