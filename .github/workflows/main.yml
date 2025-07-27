@@ -14,12 +14,14 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-
+      
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.3'
+          flutter-version: '3.32.8'
           channel: stable
+          force-install: true
+
 
       - name: Cache dependencies
         uses: actions/cache@v4
