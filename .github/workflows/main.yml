@@ -7,8 +7,8 @@ on:
     branches: [main, develop]
 
 permissions:
-  contents: read
-  issues: write  # necessário para abrir issue de aprovação manual
+  contents: write
+  issues: write
 
 jobs:
   flutter-ci:
@@ -74,3 +74,24 @@ jobs:
         with:
           name: web-build
           path: build/web
+
+  deploy-gh-pages:
+    name: Deploy to GitHub Pages
+    needs: build-web
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Download web build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
