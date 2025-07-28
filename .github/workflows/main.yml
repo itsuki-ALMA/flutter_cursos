@@ -51,30 +51,29 @@ jobs:
             Workflow: ${{ github.workflow }}
             Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
- build-web:
-  name: Build Flutter Web
-  needs: manual-approval
-  runs-on: ubuntu-22.04
+  build-web:
+    name: Build Flutter Web
+    needs: manual-approval
+    runs-on: ubuntu-22.04
 
-  steps:
-    - name: Checkout source code
-      uses: actions/checkout@v4
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
-    - name: Build Flutter Web in Docker
-      uses: addnab/docker-run-action@v3
-      with:
-        image: lmatrangolo/flutter-custom
-        options: --workdir /app -v ${{ github.workspace }}:/app
-        run: |
-          flutter pub get
-          flutter build web
+      - name: Build Flutter Web in Docker
+        uses: addnab/docker-run-action@v3
+        with:
+          image: lmatrangolo/flutter-custom
+          options: --workdir /app -v ${{ github.workspace }}:/app
+          run: |
+            flutter pub get
+            flutter build web
 
-    - name: Upload build artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: web-build
-        path: build/web
-
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web
 
   deploy-gh-pages:
     name: Deploy to GitHub Pages
