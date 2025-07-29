@@ -9,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  intl: ^0.18.1
+  video_player: ^2.7.0
+  chewie: ^1.7.4
 
 dev_dependencies:
   flutter_test:
@@ -21,3 +24,5 @@ flutter:
     - assets/images/
     - assets/images/banner.png
     - assets/images/thumb1.jpg
+    - assets/videos/videoTeste.mp4
+    - assets/videos/audioTeste.mp4
