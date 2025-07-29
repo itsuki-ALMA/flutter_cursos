@@ -16,18 +16,22 @@ class CardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     Widget imageWidget;
 
     if (imageUrl == null || imageUrl!.isEmpty) {
-      // Exibe placeholder com ícone de vídeo
+      // Usar surfaceContainerHighest para fundo e onSurfaceVariant com opacidade via withAlpha
       imageWidget = Container(
         height: 180,
-        color: Colors.black12,
-        child: const Center(
+        color: colorScheme.surfaceContainerHighest,
+        child: Center(
           child: Icon(
             Icons.play_circle_outline,
             size: 64,
-            color: Colors.black38,
+            // substituindo withOpacity(0.6) por withAlpha(153) (0.6 * 255 ≈ 153)
+            color: colorScheme.onSurfaceVariant.withAlpha(153),
           ),
         ),
       );
@@ -60,18 +64,12 @@ class CardWidget extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: textTheme.titleLarge?.copyWith(color: colorScheme.onSurface),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     description,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                    style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
