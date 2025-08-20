@@ -1,0 +1,75 @@
+# Nome do workflow
+name: Pipeline de Revisão e Release para Develop
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types: [opened, synchronize, reopened]
+  
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  # JOB 1: Roda quando o PR é aberto para solicitar a revisão
+  request-review:
+    name: 1 - Solicitar Revisão
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    # ===== ADICIONE ESTE BLOCO DE PERMISSÕES AQUI =====
+    permissions:
+      pull-requests: write
+    # ===================================================
+
+    steps:
+      - name: Solicitar revisão de código
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: ['itsuki-ALMA '] // <-- IMPORTANTE: Coloque o username do revisor aqui
+            })
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # JOB 2: Roda quando o PR é APROVADO para fazer o merge e a release
+  merge-and-release:
+    name: 2 - Mesclar e Criar Release Após Aprovação
+    needs: request-review
+    if: >-
+      github.event.pull_request.base.ref == 'develop' &&
+      github.event.review.state == 'approved' &&
+      github.event.pull_request.mergeable == true
+    runs-on: ubuntu-latest
+    # Permissões necessárias para este job (escrever conteúdo para a release e PRs para o merge)
+    permissions:
+      contents: write
+      pull-requests: write
+      
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fazer o Merge do Pull Request
+        run: gh pr merge --auto --squash --delete-branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Gerar nova tag de versão
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: "patch"
+
+      - name: Criar Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          generate_release_notes: true

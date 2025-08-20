@@ -1,0 +1,22 @@
+# flutter-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flutter-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flutter
+  template:
+    metadata:
+      labels:
+        app: flutter
+    spec:
+      containers:
+        - name: flutter
+          image: lmatrangolo/flutter-custom:latest
+          ports:
+            - containerPort: 8080
+
+#kubectl port-forward service/flutter-service 8080:80
