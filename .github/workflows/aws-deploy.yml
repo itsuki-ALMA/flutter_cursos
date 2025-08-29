@@ -31,7 +31,6 @@ jobs:
 
   manual-approval:
     name: Manual Approval
-    if: github.ref == 'refs/heads/main' # Opcional: só pedir aprovação para a branch main
     needs: flutter-ci
     runs-on: ubuntu-latest
 
@@ -69,8 +68,6 @@ jobs:
           name: web-build
           path: build/web
 
-  # --- NOVO JOB DE DEPLOY PARA O EC2 ---
-  # --- JOB DE DEPLOY PARA O EC2 COM VALORES CHUMBADOS ---
   deploy-to-ec2:
     name: Deploy to EC2
     needs: build-web
@@ -86,12 +83,9 @@ jobs:
       - name: Deploy to EC2 instance
         uses: appleboy/ssh-action@master
         with:
-          # Substitua os valores abaixo pelos seus
-          host: '204.236.212.94' # <-- COLOQUE O IP DO SEU EC2 AQUI
-          username: 'terraform-admin'   # <-- COLOQUE O USUÁRIO DO SEU EC2 AQUI
+          host: '204.236.212.94'
+          username: 'terraform-admin'
 
-          # A chave SSH privada vai aqui. Use o | para indicar um bloco de texto de várias linhas.
-          # Mantenha a indentação exatamente como está no exemplo.
           key: |
             -----BEGIN OPENSSH PRIVATE KEY-----
             b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABDg5y35pc
