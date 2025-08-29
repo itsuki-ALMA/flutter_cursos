@@ -1,0 +1,153 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  flutter-ci:
+    name: Flutter CI
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Run Flutter analyze and tests in Docker
+        uses: addnab/docker-run-action@v3
+        with:
+          image: lmatrangolo/flutter-custom
+          options: --workdir /app
+          run: |
+            flutter pub get
+            flutter analyze
+            flutter test
+
+  manual-approval:
+    name: Manual Approval
+    if: github.ref == 'refs/heads/main' # Opcional: só pedir aprovação para a branch main
+    needs: flutter-ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Wait for manual approval before deployment
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: LucasGit10
+          minimum-approvals: 1
+          issue-title: 'Approval required to deploy to EC2'
+          issue-body: 'The CI workflow has passed. Approve to deploy to the EC2 server.'
+
+  build-web:
+    name: Build Flutter Web
+    needs: manual-approval
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Build Flutter Web in Docker
+        uses: addnab/docker-run-action@v3
+        with:
+          image: lmatrangolo/flutter-custom
+          options: --workdir /app -v ${{ github.workspace }}:/app
+          run: |
+            flutter pub get
+            flutter build web
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+
+  # --- NOVO JOB DE DEPLOY PARA O EC2 ---
+  # --- JOB DE DEPLOY PARA O EC2 COM VALORES CHUMBADOS ---
+  deploy-to-ec2:
+    name: Deploy to EC2
+    needs: build-web
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Download web build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: ./build/web
+
+      - name: Deploy to EC2 instance
+        uses: appleboy/ssh-action@master
+        with:
+          # Substitua os valores abaixo pelos seus
+          host: '204.236.212.94' # <-- COLOQUE O IP DO SEU EC2 AQUI
+          username: 'terraform-admin'   # <-- COLOQUE O USUÁRIO DO SEU EC2 AQUI
+
+          # A chave SSH privada vai aqui. Use o | para indicar um bloco de texto de várias linhas.
+          # Mantenha a indentação exatamente como está no exemplo.
+          key: |
+            -----BEGIN OPENSSH PRIVATE KEY-----
+            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
+            F8NyFP2IwBgfmPSS/2mJsDI7w=
+            -----END OPENSSH PRIVATE KEY-----
+
+          script: |
+            # Remove o conteúdo antigo do diretório do Nginx
+            sudo rm -rf /var/www/html/*
+            # Copia os novos arquivos da build para o diretório do Nginx
+            sudo mv build/web/* /var/www/html/
+            # Reinicia o Nginx para garantir que as alterações sejam aplicadas
+            sudo systemctl restart nginx
