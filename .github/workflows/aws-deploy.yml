@@ -84,10 +84,58 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: '204.236.212.94'
-          username: 'terraform-admin'
+          username: 'ubuntu'
 
           key: |
-            ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCdaFBvbswj7s8jriOm3L8DAgFUxYXqfb+YmMey8NsH5OEyjo0mmXPv/B1kRr740xzvefQRNaGiri9JX9cRFyxXcPBRf7v0lGNzdR7j5Ym31L3iuDcyMt6wVcR1nYX6XfqG5+YacdFiXPUiv56FSryyd4Jqjj0bzJIBYL9IIWgNsBwRZ1yBwRi9qahSyHmBJEAi8atM2d1vMSrcuTRuiR/f6M2/n3L5Uhbc9wWK29GcFZzNzTXicdg0kz4NegU2d5ZoR8Mqh29yK4EHn02xW3zKdc0F6y4b5AMda2Gg1OjWt2hI+MYaUnU6+15cyqrwXApe6Kp3iArFrIC7Dl5PwBd/zp0xxBBkygjRuiB25u31hdY5AfH6S0ilDUQ3kRe12SGY5D0Z7PEaXU2n2drjMV4Nj39gh2ddY5Ipf5l/HsVr+Vke5udp/a2OA+6KOoh2+YqEVkYI+vNKqulbif/WZyKz/PY8K+asoh4PbhK45Ce2Tef0yyLqB6NHTFa0f5rkTDJmL+qVNNp1Bm/bgGDWmRzwRC27BV7qnX6YXdt6lfCRlYm+GKxbkK8X1QX/tE+U+CkJc8vyjk28AoiW8G8JLbPW/ja7XQrxomTTZZKvLXxDwNtvgQsCmApLxYnD/WHfGbVh8AtUMjihtGmrMnuiocgIUSBIaQ9EdW/dq0JiWaBCyQ== saori@saori-Dell-G15-5525
+            -----BEGIN OPENSSH PRIVATE KEY-----
+            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
+            -----END OPENSSH PRIVATE KEY-----
 
           script: |
             # Remove o conteúdo antigo do diretório do Nginx
