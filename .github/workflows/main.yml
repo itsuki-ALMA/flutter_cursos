@@ -1,176 +1,97 @@
 name: Flutter CI/CD
 
-
 on:
-
-push:
-
-branches: [main, develop]
-
-pull_request:
-
-branches: [main, develop]
-
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
 
 permissions:
-
-contents: write
-
-issues: write
-
+  contents: write
+  issues: write
 
 jobs:
-
-flutter-ci:
-
-name: Flutter CI
-
-runs-on: ubuntu-22.04
-
-
-steps:
-
-- name: Checkout source code
-
-uses: actions/checkout@v4
-
-
-- name: Run Flutter analyze and tests in Docker
-
-uses: addnab/docker-run-action@v3
-
-with:
-
-image: lmatrangolo/flutter-custom
-
-options: --workdir /app
-
-run: |
-
-flutter pub get
-
-flutter analyze
-
-flutter test
-
-
-manual-approval:
-
-name: Manual Approval
-
-needs: flutter-ci
-
-runs-on: ubuntu-latest
-
-
-steps:
-
-- name: Wait for manual approval before deployment
-
-uses: trstringer/manual-approval@v1
-
-with:
-
-secret: ${{ secrets.GITHUB_TOKEN }}
-
-approvers: LucasGit10
-
-minimum-approvals: 1
-
-issue-title: 'Approval required to proceed with deployment'
-
-issue-body: |
-
-The CI workflow has passed. Do you approve proceeding to the next stage?
-
-
-✅ To approve, comment: `approve`, `yes`, `lgtm`
-
-❌ To deny, comment: `deny`, `no`
-
-
-Workflow: ${{ github.workflow }}
-
-Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-
-build-web:
-
-name: Build Flutter Web
-
-needs: manual-approval
-
-runs-on: ubuntu-22.04
-
-
-steps:
-
-- name: Checkout source code
-
-uses: actions/checkout@v4
-
-
-- name: Build Flutter Web in Docker
-
-uses: addnab/docker-run-action@v3
-
-with:
-
-image: lmatrangolo/flutter-custom
-
-options: --workdir /app -v ${{ github.workspace }}:/app
-
-run: |
-
-flutter pub get
-
-flutter build web
-
-
-- name: Upload build artifact
-
-uses: actions/upload-artifact@v4
-
-with:
-
-name: web-build
-
-path: build/web
-
-
-deploy-gh-pages:
-
-name: Deploy to GitHub Pages
-
-needs: build-web
-
-runs-on: ubuntu-22.04
-
-
-steps:
-
-- name: Checkout source code
-
-uses: actions/checkout@v4
-
-
-- name: Download web build
-
-uses: actions/download-artifact@v4
-
-with:
-
-name: web-build
-
-path: build/web
-
-
-- name: Deploy to GitHub Pages
-
-uses: peaceiris/actions-gh-pages@v3
-
-with:
-
-github_token: ${{ secrets.GITHUB_TOKEN }}
-
-publish_dir: ./build/web 
+  flutter-ci:
+    name: Flutter CI
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Run Flutter analyze and tests in Docker
+        uses: addnab/docker-run-action@v3
+        with:
+          image: lmatrangolo/flutter-custom
+          options: --workdir /app
+          run: |
+            flutter pub get
+            flutter analyze
+            flutter test
+
+  manual-approval:
+    name: Manual Approval
+    needs: flutter-ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Wait for manual approval before deployment
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: LucasGit10
+          minimum-approvals: 1
+          issue-title: 'Approval required to proceed with deployment'
+          issue-body: |
+            The CI workflow has passed. Do you approve proceeding to the next stage?
+
+            ✅ To approve, comment: `approve`, `yes`, `lgtm`
+            ❌ To deny, comment: `deny`, `no`
+
+            Workflow: ${{ github.workflow }}
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  build-web:
+    name: Build Flutter Web
+    needs: manual-approval
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Build Flutter Web in Docker
+        uses: addnab/docker-run-action@v3
+        with:
+          image: lmatrangolo/flutter-custom
+          options: --workdir /app -v ${{ github.workspace }}:/app
+          run: |
+            flutter pub get
+            flutter build web
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+
+  deploy-gh-pages:
+    name: Deploy to GitHub Pages
+    needs: build-web
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Download web build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
