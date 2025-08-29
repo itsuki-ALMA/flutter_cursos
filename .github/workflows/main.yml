@@ -68,9 +68,7 @@ jobs:
         with:
           name: web-build
           path: build/web
-
-  # --- NOVO JOB DE DEPLOY PARA O EC2 ---
-  # --- JOB DE DEPLOY PARA O EC2 COM VALORES CHUMBADOS ---
+-
   deploy-to-ec2:
     name: Deploy to EC2
     needs: build-web

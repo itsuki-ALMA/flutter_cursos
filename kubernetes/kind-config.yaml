@@ -7,4 +7,3 @@ nodes:
 
 # kind create Cluster
 # kubectl apply -f deployment.yaml
-# kubectl apply -f service.yamlaa
