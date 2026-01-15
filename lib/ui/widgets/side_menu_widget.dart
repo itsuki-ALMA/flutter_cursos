@@ -5,27 +5,34 @@ class SideMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.grey),
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: colorScheme.primary,
+            ),
             child: Text(
               'Menu',
-              style: TextStyle(fontSize: 24, color: Colors.white),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: colorScheme.onPrimary,
+              ),
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Home'),
+            leading: Icon(Icons.home, color: colorScheme.onSurface),
+            title: Text('Home', style: theme.textTheme.bodyLarge),
             onTap: () {
               Navigator.pushReplacementNamed(context, 'home');
             },
           ),
           ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Sair'),
+            leading: Icon(Icons.logout, color: colorScheme.onSurface),
+            title: Text('Sair', style: theme.textTheme.bodyLarge),
             onTap: () {
               Navigator.pushReplacementNamed(context, 'login');
             },
